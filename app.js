@@ -10,16 +10,14 @@ app.use('/api/contacts', contactsRouter);
 
 const connectToMongoDB = async () => {
   try {
-    await mongoose.connect(DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(DB_URL); // no options needed
     console.log("Database connection successful");
   } catch (error) {
     console.error("Database connection error:", error.message);
     process.exit(1);
   }
 };
+
 
 connectToMongoDB();
 
