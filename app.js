@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const contactsRouter = require("./routes/api/contacts");
 
 const app = express();
-const DB_URL = "mongodb+srv://larisagabrielamoldoveanu:vWAPFTRyQh0Hx8zZ@cluster0.jhbzqld.mongodb.net/ "; 
+const DB_URL = "mongodb+srv://larisagabrielamoldoveanu:vWAPFTRyQh0Hx8zZ@cluster0.jhbzqld.mongodb.net/db-contacts?retryWrites=true&w=majority"; 
 
 app.use(express.json());
 app.use('/api/contacts', contactsRouter);

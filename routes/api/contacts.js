@@ -8,7 +8,7 @@ const {
   removeContact,
   updateContact,
   updateStatusContact
-} = require('../../models/ContactModel');
+} = require('../../models/contacts');
 
 const contactSchema = Joi.object({
   name: Joi.string().required(),
