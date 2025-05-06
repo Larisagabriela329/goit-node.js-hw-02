@@ -1,19 +1,34 @@
-// const fs = require('fs/promises')
+const Contact = require("./ContactModel");
 
-const listContacts = async () => {}
+async function listContacts() {
+  return await Contact.find();
+}
 
-const getContactById = async (contactId) => {}
+async function getById(contactId) {
+  return await Contact.findById(contactId);
+}
 
-const removeContact = async (contactId) => {}
+async function addContact(data) {
+  return await Contact.create(data);
+}
 
-const addContact = async (body) => {}
+async function removeContact(contactId) {
+  return await Contact.findByIdAndDelete(contactId);
+}
 
-const updateContact = async (contactId, body) => {}
+async function updateContact(contactId, body) {
+  return await Contact.findByIdAndUpdate(contactId, body, { new: true });
+}
+
+async function updateStatusContact(contactId, { favorite }) {
+  return await Contact.findByIdAndUpdate(contactId, { favorite }, { new: true });
+}
 
 module.exports = {
   listContacts,
-  getContactById,
-  removeContact,
+  getById,
   addContact,
+  removeContact,
   updateContact,
-}
+  updateStatusContact,
+};
