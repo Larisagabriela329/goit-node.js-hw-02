@@ -10,6 +10,7 @@ const DB_URL = process.env.DB_URL;
 app.use(express.json());
 app.use('/api/contacts', contactsRouter);
 app.use('/users', usersRouter);
+app.use(express.static("public"));
 
 const connectToMongoDB = async () => {
   try {
@@ -24,4 +25,4 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
-module.exports = app; // Export app for use in server.js
+module.exports = app; 

@@ -1,6 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const fs = require("fs/promises");
+const path = require("path");
+const Jimp = require("jimp").default;
+const gravatar = require("gravatar");
 
 const SECRET_KEY = process.env.JWT_SECRET; 
 
@@ -12,15 +16,18 @@ const signup = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = await User.create({ email, password: hashPassword });
+  const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
+  
+  const newUser = await User.create({ email, password: hashPassword, avatarURL });
 
   res.status(201).json({
     user: {
       email: newUser.email,
       subscription: newUser.subscription,
+      avatarURL: newUser.avatarURL
     },
   });
-};
+}; 
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -85,10 +92,43 @@ const updateSubscription = async (req, res) => {
   });
 };
 
+const avatarsDir = path.join(__dirname, "../public/avatars");
+
+const updateAvatar = async (req, res) => {
+
+  const { path: tempUpload, originalname } = req.file;
+if (!req.file) {
+  return res.status(400).json({ message: "No file uploaded" });
+}
+
+
+  const { _id } = req.user;
+
+  const filename = `${_id}-${originalname}`;
+  const resultUpload = path.join(avatarsDir, filename);
+
+  try {
+    const image = await Jimp.read(tempUpload);
+    await image.resize(250, 250).writeAsync(tempUpload);
+  } catch (err) {
+    console.error("Jimp processing error:", err);
+    return res.status(500).json({ message: "Error processing image" });
+  }
+  
+
+  await fs.rename(tempUpload, resultUpload);
+
+  const avatarURL = `/avatars/${filename}`;
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.json({ avatarURL });
+};
+
 module.exports = {
   signup,
   login,
   logout,
   getCurrent,
   updateSubscription,
+  updateAvatar
 };

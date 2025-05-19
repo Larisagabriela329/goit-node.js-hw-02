@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const gratavar = require("gravatar");
 
 const userSchema = new Schema({
   password: {
@@ -19,7 +20,13 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  avatarURL: {
+    type: String,
+    default: null,
+  }
 });
+
+
 
 const User = model("user", userSchema);
 
