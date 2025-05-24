@@ -1,12 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const contactsRouter = require("./routes/api/contacts");
+const usersRouter = require("./routes/api/users");
+require('dotenv').config();
 
 const app = express();
-const DB_URL = "mongodb+srv://larisagabrielamoldoveanu:vWAPFTRyQh0Hx8zZ@cluster0.jhbzqld.mongodb.net/db-contacts?retryWrites=true&w=majority"; 
+const DB_URL = process.env.DB_URL;
 
 app.use(express.json());
 app.use('/api/contacts', contactsRouter);
+app.use('/users', usersRouter);
+app.use(express.static("public"));
 
 const connectToMongoDB = async () => {
   try {
@@ -21,4 +25,4 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
-module.exports = app; // Export app for use in server.js
+module.exports = app; 
