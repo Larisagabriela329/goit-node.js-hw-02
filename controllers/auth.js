@@ -5,10 +5,14 @@ const fs = require("fs/promises");
 const path = require("path");
 const Jimp = require("jimp").default;
 const gravatar = require("gravatar");
+const { sendVerificationEmail } = require("../emailService/emailService");
+
 
 const SECRET_KEY = process.env.JWT_SECRET; 
 
 const signup = async (req, res) => {
+  const { nanoid } = await import("nanoid");
+
   const { email, password } = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -17,24 +21,32 @@ const signup = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email, { s: '250', d: 'retro' }, true);
+  const verificationToken = nanoid();
   
-  const newUser = await User.create({ email, password: hashPassword, avatarURL });
+  const newUser = await User.create({
+    email, 
+    password: hashPassword, 
+    avatarURL, 
+    verificationToken });
 
-  res.status(201).json({
-    user: {
-      email: newUser.email,
-      subscription: newUser.subscription,
-      avatarURL: newUser.avatarURL
-    },
-  });
-}; 
+    await sendVerificationEmail(email, verificationToken);
+
+res.status(201).json({
+  message: 'User created. Please check your email to verify your account.',
+});
+};
 
 const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
+  
   if (!user) {
     return res.status(401).json({ message: "Email or password is wrong" });
+  }
+
+  if (!user.verify) {
+    return res.status(401).json({ message: "Email not verified" });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -57,6 +69,22 @@ const login = async (req, res) => {
       subscription: user.subscription,
     },
   });
+};
+
+const verifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.verify = true;
+  user.verificationToken = null;
+  await user.save();
+
+  res.status(200).json({ message: "Verification successful" });
 };
 
 const logout = async (req, res) => {
@@ -130,5 +158,6 @@ module.exports = {
   logout,
   getCurrent,
   updateSubscription,
-  updateAvatar
+  updateAvatar,
+  verifyEmail
 };
